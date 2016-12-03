@@ -27,19 +27,17 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */ 
+ */
 
-
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.Shape;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.font.FontRenderContext;
@@ -48,82 +46,113 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JApplet;
 import javax.swing.JFrame;
-
+import javax.swing.Timer;
 
 /**
  * This class demonstrates how to load an Image from an external file
  */
-public class GraphTest extends Component {
-          
-    BufferedImage img;
-    final int width = 8;
-    final int height = 8;
+public class GraphTest extends JApplet implements ActionListener {
+	private static final JApplet applet = new GraphTest();
+	private static final Timer timer = new Timer(100, (ActionListener) applet);
+	
+	BitMapFontGenerator bmfg = new BitMapFontGenerator("Hello");
 
-    public void paint(Graphics g) {
-    	Graphics2D g2d = (Graphics2D)g;
-        AffineTransform transform = new AffineTransform();
-        transform.scale(30, 30);
-        g2d.setTransform(transform);
-        g2d.drawImage(img, 0, 0, null);
-    }
+	class BitMapFontGenerator {
+		final int width = 8;
+		final int height = 8;
 
-    public GraphTest() {
-       img =
-    	new BufferedImage(width, height,
-    			BufferedImage.TYPE_BYTE_GRAY);
-       Graphics2D g2 = img.createGraphics();
-       Font font = new Font("Monospaced", Font.PLAIN, 8);
+		private int charIndex = 0;
+		public final String text;
 
-       String s = "g";
+		public BitMapFontGenerator(String s) {
+			text = s;
+		}
 
-       g2.setFont(font);
-       
-       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-               RenderingHints.VALUE_ANTIALIAS_OFF);
+		public BufferedImage getNextChar() {
+			String s = text.substring(charIndex, charIndex + 1);
+			charIndex++;
 
-       g2.setRenderingHint(RenderingHints.KEY_RENDERING,
-               RenderingHints.VALUE_RENDER_QUALITY);
+			if (charIndex >= text.length()) {
+				charIndex = 0;
+			}
+			
+			System.out.println("char:" + s);
 
-    // get metrics from the graphics
-       FontMetrics metrics = g2.getFontMetrics(font);
-       // get the height of a line of text in this
-       // font and render context
-       int hgt = metrics.getHeight();
-       // get the advance of my text in this font
-       // and render context
-       int adv = metrics.stringWidth(s);
-       // calculate the size of a box to hold the
-       // text with some padding.
-       Dimension size = new Dimension(adv, hgt + 1);
-       
-       Rectangle2D r = metrics.getStringBounds(s, g2);
-      
-       FontRenderContext frc = g2.getFontRenderContext();
-       TextLayout textTl = new TextLayout(s, font, frc);
-       AffineTransform transform = new AffineTransform();
-       //Shape outline = textTl.getOutline(null);
-       //Rectangle r = outline.getBounds();
-       transform = g2.getTransform();
-       transform.scale(8d/r.getWidth(), 8d/(r.getHeight()-1d));
-       g2.transform(transform);
-       g2.drawString(s, 0, height - 1);
-    }
+			BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+			Graphics2D g2 = img.createGraphics();
+			Font font = new Font("Monospaced", Font.PLAIN, 8);
 
-    public static void main(String[] args) {
-        JFrame f = new JFrame("Create Image Sample");
-            
-        f.addWindowListener(new WindowAdapter(){
-                public void windowClosing(WindowEvent e) {
-                    System.exit(0);
-                }
-            });
+			g2.setFont(font);
 
-        //f.getContentPane().add("Center", new GraphTest());
-        f.add(new GraphTest());
-        f.pack();
-        f.setSize(new Dimension(300, 300));
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        f.setVisible(true);
-    }
+			g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+			// get metrics from the graphics
+			FontMetrics metrics = g2.getFontMetrics(font);
+			// get the height of a line of text in this
+			// font and render context
+			int hgt = metrics.getHeight();
+			// get the advance of my text in this font
+			// and render context
+			int adv = metrics.stringWidth(s);
+			// calculate the size of a box to hold the
+			// text with some padding.
+			Dimension size = new Dimension(adv, hgt + 1);
+
+			Rectangle2D r = metrics.getStringBounds(s, g2);
+
+			FontRenderContext frc = g2.getFontRenderContext();
+			TextLayout textTl = new TextLayout(s, font, frc);
+			AffineTransform transform = new AffineTransform();
+			// Shape outline = textTl.getOutline(null);
+			// Rectangle r = outline.getBounds();
+			transform = g2.getTransform();
+			transform.scale(8d / r.getWidth(), 8d / (r.getHeight() - 1d));
+			g2.transform(transform);
+			g2.drawString(s, 0, height - 1);
+
+			return img;
+		}
+
+	}
+
+	@Override
+	public void paint(Graphics g) {
+		Graphics2D g2d = (Graphics2D) g;
+		AffineTransform transform = new AffineTransform();
+		transform.scale(30, 30);
+		g2d.setTransform(transform);
+		g2d.drawImage(bmfg.getNextChar(), 0, 0, null);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		this.repaint();
+		System.out.println("repaint");
+	}
+
+	public static void main(String[] args) {
+		JFrame f = new JFrame("Create Image Sample");
+
+		f.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				timer.stop();
+
+				System.exit(0);
+			}
+		});
+
+		// f.getContentPane().add("Center", new GraphTest());
+		f.add(applet);
+		f.pack();
+		f.setSize(new Dimension(300, 300));
+
+		f.setVisible(true);
+		
+		timer.setRepeats(true);
+		timer.start();
+	}
 }
