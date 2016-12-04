@@ -29,21 +29,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JApplet;
@@ -55,83 +48,26 @@ import javax.swing.Timer;
  */
 public class GraphTest extends JApplet implements ActionListener {
 	private static final JApplet applet = new GraphTest();
-	private static final Timer timer = new Timer(100, (ActionListener) applet);
+	private static final Timer timer = new Timer(1000, (ActionListener) applet);
+	private BufferedImage img;
 	
-	BitMapFontGenerator bmfg = new BitMapFontGenerator("Hello");
-
-	class BitMapFontGenerator {
-		final int width = 8;
-		final int height = 8;
-
-		private int charIndex = 0;
-		public final String text;
-
-		public BitMapFontGenerator(String s) {
-			text = s;
-		}
-
-		public BufferedImage getNextChar() {
-			String s = text.substring(charIndex, charIndex + 1);
-			charIndex++;
-
-			if (charIndex >= text.length()) {
-				charIndex = 0;
-			}
-			
-			System.out.println("char:" + s);
-
-			BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
-			Graphics2D g2 = img.createGraphics();
-			Font font = new Font("Monospaced", Font.PLAIN, 8);
-
-			g2.setFont(font);
-
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-
-			g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
-			// get metrics from the graphics
-			FontMetrics metrics = g2.getFontMetrics(font);
-			// get the height of a line of text in this
-			// font and render context
-			int hgt = metrics.getHeight();
-			// get the advance of my text in this font
-			// and render context
-			int adv = metrics.stringWidth(s);
-			// calculate the size of a box to hold the
-			// text with some padding.
-			Dimension size = new Dimension(adv, hgt + 1);
-
-			Rectangle2D r = metrics.getStringBounds(s, g2);
-
-			FontRenderContext frc = g2.getFontRenderContext();
-			TextLayout textTl = new TextLayout(s, font, frc);
-			AffineTransform transform = new AffineTransform();
-			// Shape outline = textTl.getOutline(null);
-			// Rectangle r = outline.getBounds();
-			transform = g2.getTransform();
-			transform.scale(8d / r.getWidth(), 8d / (r.getHeight() - 1d));
-			g2.transform(transform);
-			g2.drawString(s, 0, height - 1);
-
-			return img;
-		}
-
-	}
+	BitMapFontGenerator bmfg = new BitMapFontGenerator("Hello", 8, 8);
 
 	@Override
 	public void paint(Graphics g) {
-		Graphics2D g2d = (Graphics2D) g;
-		AffineTransform transform = new AffineTransform();
-		transform.scale(30, 30);
-		g2d.setTransform(transform);
-		g2d.drawImage(bmfg.getNextChar(), 0, 0, null);
+		if (img != null) {
+			Graphics2D g2d = (Graphics2D) g;
+			AffineTransform transform = new AffineTransform();
+			transform.scale(30, 30);
+			g2d.setTransform(transform);
+			g2d.drawImage(img, 0, 0, null);
+		}
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		img = bmfg.getNextChar();
 		this.repaint();
-		System.out.println("repaint");
 	}
 
 	public static void main(String[] args) {
@@ -153,6 +89,7 @@ public class GraphTest extends JApplet implements ActionListener {
 		f.setVisible(true);
 		
 		timer.setRepeats(true);
+		timer.setDelay(1000);
 		timer.start();
 	}
 }
