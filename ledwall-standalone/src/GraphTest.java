@@ -43,6 +43,8 @@ import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
+import hu.liferay.borkutip.ledwall.backend.BitMapFontGenerator;
+
 /**
  * This class demonstrates how to load an Image from an external file
  */

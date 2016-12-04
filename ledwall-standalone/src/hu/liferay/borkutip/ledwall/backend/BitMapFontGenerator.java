@@ -1,3 +1,4 @@
+package hu.liferay.borkutip.ledwall.backend;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -10,7 +11,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 
-class BitMapFontGenerator {
+public class BitMapFontGenerator {
 		public final int width;
 		public final int height;
 
@@ -89,8 +90,6 @@ class BitMapFontGenerator {
 				}
 			}
 			
-			System.out.println("char:" + s);
-
 			BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
 			Graphics2D g2 = img.createGraphics();
 			Font font = new Font("Monospaced", Font.PLAIN, 8);
