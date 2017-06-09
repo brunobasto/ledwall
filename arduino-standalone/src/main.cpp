@@ -188,12 +188,9 @@ void printString(char s[]) {
 }
 
 void loop() {
-    printString("Liferay");
+    printString("Liferay ");
     delay(1000);
 }
-
-
-
 
 void clearPixels() {
     for (uint8_t pos = 0; pos < numPixels; pos++) {
